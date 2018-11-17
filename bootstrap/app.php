@@ -23,7 +23,13 @@ $app = new Laravel\Lumen\Application(
 	realpath(__DIR__ . '/../')
 );
 
-// $app->withFacades();
+$app->withFacades();
+
+if (!class_exists('Storage')) {
+	class_alias(\Illuminate\Support\Facades\Storage::class, 'Storage');
+}
+
+$app->configure('filesystems');
 
 // $app->withEloquent();
 
@@ -78,10 +84,15 @@ $app->singleton(
 |
 */
 
-// $app->register(App\Providers\AppServiceProvider::class);
-// $app->register(App\Providers\AuthServiceProvider::class);
-// $app->register(App\Providers\EventServiceProvider::class);
+//$app->register(App\Providers\AppServiceProvider::class);
+
+$app->register(Illuminate\Filesystem\FilesystemServiceProvider::class);
 $app->register(\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class);
+
+$app->bind(
+	\App\Storage\StorageInterface::class,
+	\App\Storage\FileStorage::class
+);
 
 /*
 |--------------------------------------------------------------------------
