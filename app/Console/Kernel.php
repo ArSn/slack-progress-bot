@@ -14,6 +14,9 @@ class Kernel extends ConsoleKernel
 	 */
 	protected $commands = [
 		\App\Console\Commands\StartProgress::class,
+		\App\Console\Commands\MarkInProgress::class,
+		\App\Console\Commands\MarkSuccessful::class,
+		\App\Console\Commands\MarkFailed::class,
 	];
 
 	/**

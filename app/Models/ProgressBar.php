@@ -3,30 +3,52 @@
 namespace App\Models;
 
 use App\Storage\StoreableInterface;
+use OutOfBoundsException;
 
 class ProgressBar implements StoreableInterface
 {
 	private $name;
+	/** @var Step[] */
 	private $steps = [];
+	/** @var Message */
 	private $message;
 	private $startTime;
+	private $lastUpdated;
 
-	public function __construct(string $name)
+	public function setName(string $name)
 	{
 		$this->name = $name;
 	}
 
-	public function addStep($step): void
+	public function addStep(string $name): void
 	{
+		$step = app()->make(Step::class);
+		$step->setName($name);
 		$this->steps[] = $step;
+	}
+
+	public function getStep(string $name): Step
+	{
+		foreach ($this->steps as $step) {
+			if ($step->getName() == $name) {
+				return $step;
+			}
+		}
+		throw new OutOfBoundsException('No step with name "' . $name . '" was found.');
 	}
 
 	public function toString(): string
 	{
+		$steps = [];
+		foreach ($this->steps as $step) {
+			$steps[] = $step->toString();
+		}
+
 		return json_encode(
 			[
 				'name' => $this->getName(),
-				'steps' => $this->steps,
+				'steps' => $steps,
+				'message' => $this->message->toString(),
 			]
 		);
 	}
@@ -35,7 +57,18 @@ class ProgressBar implements StoreableInterface
 	{
 		$data = json_decode($string, true);
 		$this->name = $data['name'];
-		$this->steps = $data['steps'];
+
+		$steps = [];
+		foreach ($data['steps'] as $stepData) {
+			$step = app()->make(Step::class);
+			$step->fromString($stepData);
+			$steps[] = $step;
+		}
+		$this->steps = $steps;
+
+		$message = app()->make(Message::class);
+		$message->fromString($data['message']);
+		$this->message = $message;
 	}
 
 	public function getName(): string
@@ -51,17 +84,31 @@ class ProgressBar implements StoreableInterface
 	public function start(): bool
 	{
 		$this->startTime = time();
+		$this->lastUpdated = time();
 
 		$message = app()->make(Message::class);
+		$this->message = $message;
 
-		return $message->send('Starting ' . $this->composeProgressMessage());
+		return $this->updateMessage();
+	}
+
+	public function update(): bool
+	{
+		$this->lastUpdated = time();
+
+		return $this->updateMessage();
+	}
+
+	private function updateMessage()
+	{
+		return $this->message->send($this->composeProgressMessage());
 	}
 
 	private function composeProgressMessage(): string
 	{
-		$message = $this->name . ': ';
+		$message = $this->name . ':';
 		foreach ($this->steps as $step) {
-			$message .= " $step ->";
+			$message .= ' ' . $step->composeStepMessage();
 		}
 
 		return $message;
