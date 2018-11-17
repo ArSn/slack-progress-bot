@@ -15,7 +15,7 @@ class StartProgress extends AbstractCommand
 	{
 		/** @var ProgressBar $bar */
 		$bar = app()->make(ProgressBar::class);
-		$bar->setName($this->argument('name'));
+		$bar->setName($this->stringArgument('name'));
 
 		collect($this->argument('step'))->each(
 			function($step) use ($bar) {

@@ -14,8 +14,8 @@ class MarkInProgress extends AbstractCommand
 	public function handle()
 	{
 		/** @var ProgressBar $bar */
-		$bar = $this->storage->retrieve($this->argument('progress'));
-		$bar->getStep($this->argument('step'))->markInProgress();
+		$bar = $this->storage->retrieve($this->stringArgument('progress'));
+		$bar->getStep($this->stringArgument('step'))->markInProgress();
 
 		if ($bar->update()) {
 			$this->storage->store($bar);
