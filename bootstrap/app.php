@@ -30,6 +30,7 @@ if (!class_exists('Storage')) {
 }
 
 $app->configure('filesystems');
+$app->configure('slack');
 
 // $app->withEloquent();
 
@@ -88,6 +89,32 @@ $app->singleton(
 
 $app->register(Illuminate\Filesystem\FilesystemServiceProvider::class);
 $app->register(\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class);
+
+$app->bind(
+	\App\Storage\StorageInterface::class,
+	\App\Storage\FileStorage::class
+);
+
+$app->bind(
+	\GuzzleHttp\ClientInterface::class,
+	function() {
+		return new GuzzleHttp\Client(
+			[
+				'timeout' => 10,
+				'headers' => [
+					'Authorization' => 'Bearer ' . config('slack.bot.token'),
+				],
+			]
+		);
+	}
+);
+
+$app->bind(
+	\App\Models\Message::class,
+	function() use ($app) {
+		return new \App\Models\Message($app->make(\GuzzleHttp\ClientInterface::class));
+	}
+);
 
 $app->bind(
 	\App\Storage\StorageInterface::class,

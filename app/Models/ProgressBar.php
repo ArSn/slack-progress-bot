@@ -8,6 +8,8 @@ class ProgressBar implements StoreableInterface
 {
 	private $name;
 	private $steps = [];
+	private $message;
+	private $startTime;
 
 	public function __construct(string $name)
 	{
@@ -44,5 +46,24 @@ class ProgressBar implements StoreableInterface
 	public function getType(): string
 	{
 		return get_class($this);
+	}
+
+	public function start(): bool
+	{
+		$this->startTime = time();
+
+		$message = app()->make(Message::class);
+
+		return $message->send('Starting ' . $this->composeProgressMessage());
+	}
+
+	private function composeProgressMessage(): string
+	{
+		$message = $this->name . ': ';
+		foreach ($this->steps as $step) {
+			$message .= " $step ->";
+		}
+
+		return $message;
 	}
 }

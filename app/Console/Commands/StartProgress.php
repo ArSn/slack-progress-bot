@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Bot;
 use App\Models\ProgressBar;
 use App\Storage\StorageInterface;
 use Illuminate\Console\Command;
@@ -31,8 +32,11 @@ class StartProgress extends Command
 			}
 		);
 
-		$this->storage->store($bar);
-
-		$this->info('Progress started.');
+		if ($bar->start()) {
+			$this->storage->store($bar);
+			$this->info('Progress started.');
+		} else {
+			$this->error('Progress could not be started. See log.');
+		}
 	}
 }
