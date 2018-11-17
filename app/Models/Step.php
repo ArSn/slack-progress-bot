@@ -79,7 +79,7 @@ class Step implements StoreableInterface
 	{
 		switch ($this->state) {
 			case self::STATE_NEW:
-				return ':gear:';
+				return '...';
 			case self::STATE_IN_PROGRESS:
 				return ':hourglass_flowing_sand:';
 			case self::STATE_SUCCESSFUL:

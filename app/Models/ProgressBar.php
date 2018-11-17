@@ -49,6 +49,8 @@ class ProgressBar implements StoreableInterface
 				'name' => $this->getName(),
 				'steps' => $steps,
 				'message' => $this->message->toString(),
+				'startTime' => $this->startTime,
+				'lastUpdated' => $this->lastUpdated,
 			]
 		);
 	}
@@ -69,6 +71,9 @@ class ProgressBar implements StoreableInterface
 		$message = app()->make(Message::class);
 		$message->fromString($data['message']);
 		$this->message = $message;
+
+		$this->startTime = $data['startTime'];
+		$this->lastUpdated = $data['lastUpdated'];
 	}
 
 	public function getName(): string
@@ -106,11 +111,18 @@ class ProgressBar implements StoreableInterface
 
 	private function composeProgressMessage(): string
 	{
-		$message = $this->name . ':';
+		$message = $this->name . ' (start ' . $this->composeTime($this->startTime) . '):';
 		foreach ($this->steps as $step) {
 			$message .= ' ' . $step->composeStepMessage();
 		}
 
+		$message .= ' (updated: ' . $this->composeTime($this->lastUpdated) . ')';
+
 		return $message;
+	}
+
+	private function composeTime(int $time): string
+	{
+		return date('H:i:s', $time);
 	}
 }

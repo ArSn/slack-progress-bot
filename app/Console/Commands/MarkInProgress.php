@@ -13,19 +13,15 @@ class MarkInProgress extends AbstractCommand
 
 	public function handle()
 	{
-		$bar = new ProgressBar($this->argument('name'));
+		/** @var ProgressBar $bar */
+		$bar = $this->storage->retrieve($this->argument('progress'));
+		$bar->getStep($this->argument('step'))->markInProgress();
 
-		collect($this->argument('step'))->each(
-			function($step) use ($bar) {
-				$bar->addStep($step);
-			}
-		);
-
-		if ($bar->start()) {
+		if ($bar->update()) {
 			$this->storage->store($bar);
-			$this->info('Progress started.');
+			$this->info('Step marked as in-progress.');
 		} else {
-			$this->error('Progress could not be started. See log.');
+			$this->error('Step could not be updated. See log.');
 		}
 	}
 }

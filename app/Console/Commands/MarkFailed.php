@@ -3,39 +3,25 @@
 namespace App\Console\Commands;
 
 use App\Models\ProgressBar;
-use App\Storage\StorageInterface;
-use Illuminate\Console\Command;
 
-class MarkFailed extends Command
+class MarkFailed extends AbstractCommand
 {
 	protected $signature = "slack:mark-failed
 	                        {progress : The name of the progress-bar of the step to be marked}
 	                        {step : The key of the step to be marked as failed}";
 	protected $description = "Mark a step as failed";
-	private $storage;
-
-	public function __construct(StorageInterface $storage)
-	{
-		parent::__construct();
-
-		$this->storage = $storage;
-	}
 
 	public function handle()
 	{
-		$bar = new ProgressBar($this->argument('name'));
+		/** @var ProgressBar $bar */
+		$bar = $this->storage->retrieve($this->argument('progress'));
+		$bar->getStep($this->argument('step'))->markFailed();
 
-		collect($this->argument('step'))->each(
-			function($step) use ($bar) {
-				$bar->addStep($step);
-			}
-		);
-
-		if ($bar->start()) {
+		if ($bar->update()) {
 			$this->storage->store($bar);
-			$this->info('Progress started.');
+			$this->info('Step marked as failed.');
 		} else {
-			$this->error('Progress could not be started. See log.');
+			$this->error('Step could not be updated. See log.');
 		}
 	}
 }
