@@ -9,7 +9,7 @@ use RuntimeException;
 
 class Step implements StoreableInterface
 {
-	private $name;
+	private $name = '';
 	private $state = self::STATE_NEW;
 	public const STATE_NEW = 'new';
 	public const STATE_IN_PROGRESS = 'in-progress';
@@ -68,6 +68,11 @@ class Step implements StoreableInterface
 	{
 		$this->guardAgainstIvalidState($state);
 		$this->state = $state;
+	}
+
+	public function getState(): string
+	{
+		return $this->state;
 	}
 
 	public function composeStepMessage(): string
