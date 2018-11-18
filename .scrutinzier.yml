@@ -7,16 +7,16 @@ build:
             tests:
                 override:
                 - php-scrutinizer-run
-                -   command: phpcs-run
-                    use_website_config: true
+                - command: phpcs-run
+                  use_website_config: true
         tests: true
         coverage:
             tests:
                 override:
-                -   command: vendor/bin/phpunit --coverage-clover=coverage.xml
-                    coverage:
-                        file: coverage.xml
-                        format: clover
+                - command: vendor/bin/phpunit --coverage-clover=coverage.xml
+                  coverage:
+                      file: coverage.xml
+                      format: clover
 filter:
     paths:
     - 'app/*'
